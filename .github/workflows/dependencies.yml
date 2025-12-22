@@ -2,13 +2,8 @@ name: Dependencies review ⚡️
 run-name: Dependencies review ⚡️
 
 on:
-  schedule:
-    - cron: "0 0 * * *"
-
   pull_request:
     branches: ["main"]
-
-  workflow_dispatch:
 
 permissions: {}
 
