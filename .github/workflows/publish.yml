@@ -1,0 +1,83 @@
+# GitHub Actions workflow for automated releases
+#
+# This workflow automates the release process using Google's release-please action.
+# It triggers on pushes to the main branch and creates versioned releases based on
+# conventional commits.
+#
+# Workflow Structure:
+#   1. setup: Configures the infrastructure and environment settings
+#      - Outputs: environment name and timezone for downstream jobs
+#      - Sets up base environment configuration
+#
+#   2. release: Executes the release process
+#      - Dependencies: Requires setup job to complete
+#      - Uses release-please-action to automate version bumps and changelog generation
+#      - Requires RELEASE_TOKEN secret for repository write access
+#
+# Permissions:
+#   - contents: write - Required for creating releases and tags
+#   - issues: write - Required for closing/updating release-related issues
+#   - pull-requests: write - Required for managing release PRs
+#
+# Configuration:
+#   - Environment: base (configurable via env vars)
+#   - Timezone: Configurable via repository variables (TIMEZONE)
+#   - Release type: node (follows Node.js versioning conventions)
+#
+# Required Secrets:
+#   - RELEASE_TOKEN: GitHub token with appropriate permissions for release operations
+#
+# Required Variables:
+#   - TIMEZONE: Repository variable defining the timezone for operations
+#
+
+name: Automated release 🚀
+run-name: Automated release 🚀
+
+permissions: {}
+
+on:
+  push:
+    branches: [main]
+
+env:
+  environment: base
+  timezone: ${{ vars.TIMEZONE }}
+
+jobs:
+  # 1. Setup test infrastructure
+  setup:
+    name: Infrastructure 🔧
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ env.environment }}
+      timezone: ${{ env.timezone }}
+    steps:
+      - name: Environment 🧪
+        run: echo "Environment set to ${{ env.environment }}"
+
+      - name: Timezone 🌐
+        run: echo "Timezone set to ${{ env.timezone }}"
+
+  # 2. Update files
+  release:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    name: Release ✨
+    needs: setup
+    environment:
+      name: ${{ needs.setup.outputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # frozen: v6.0.1
+
+      - name: Create
+        uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # frozen: v4.4.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node

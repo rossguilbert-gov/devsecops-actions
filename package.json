@@ -1,0 +1,32 @@
+{
+  "name": "moj-actions",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "devsecops",
+    "moj",
+    "actions"
+  ],
+  "homepage": "https://github.com/ministryofjustice/devsecops-actions#readme",
+  "bugs": {
+    "url": "https://github.com/ministryofjustice/devsecops-actions/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ministryofjustice/devsecops-actions.git"
+  },
+  "license": "MIT",
+  "author": "Abhi Markan",
+  "scripts": {
+    "housekeeping": "npm update --save && npm install && npm audit && npm run validate:all",
+    "spellcheck": "cspell lint --gitignore --no-must-find-files --unique --no-progress --show-suggestions --color **/*",
+    "validate:md": "npx markdownlint-cli --config .markdownlint.json \"**/*.md\"",
+    "validate:yml": "npx yaml-lint **/*.yml --ignore=**/node_modules",
+    "validate:all": "npm run validate:yml && npm run validate:md"
+  },
+  "devDependencies": {
+    "cspell": "^9.4.0",
+    "markdownlint-cli": "^0.47.0",
+    "yaml-lint": "^1.7.0"
+  }
+}
