@@ -1,3 +1,51 @@
+# Reusable workflow for dependency management and security review
+#
+# This workflow performs dependency review and automated updates using GitHub's
+# dependency-review-action and Renovate bot.
+#
+# Workflow Inputs:
+#   renovate-version:
+#     description: Version of Renovate CLI to use
+#     type: string
+#     required: false
+#     default: "42.64.1"
+#
+# Workflow Secrets:
+#   token:
+#     description: GitHub repository token with the following permissions:
+#       - contents: read/write
+#       - pull-requests: read/write
+#       - issues: read/write
+#       - security-events: read
+#     required: true
+#
+# Jobs:
+#   setup:
+#     - Initializes environment and timezone configuration
+#     - Outputs configuration for downstream jobs
+#
+#   dependencies:
+#     - Checks out repository code
+#     - Sets up Node.js environment
+#     - Installs project dependencies
+#     - Runs dependency review action to analyze dependency changes
+#     - Executes Renovate bot for automated dependency updates
+#     - Supports multi-repo discovery when token has organization-wide access
+#
+# Environment Variables:
+#   environment: Set to "base" by default
+#   timezone: Retrieved from repository variables
+#
+# Usage:
+#   jobs:
+#     dependency-review:
+#       uses: ministryofjustice/devsecops-actions/.github/workflows/_dependency.yml@main
+#       with:
+#         renovate-version: "42.64.1"
+#       secrets:
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#
+
 name: Dependency review ⚡️
 run-name: Dependency review ⚡️
 
