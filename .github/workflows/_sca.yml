@@ -1,3 +1,66 @@
+# SCA (Software Composition Analysis) Workflow
+#
+# This reusable workflow performs dependency governance and automated dependency updates
+# for repositories. It combines dependency review scanning and Renovate bot automation
+# to ensure dependencies are up-to-date and secure.
+#
+# Features:
+#   - Dependency review and scanning for security vulnerabilities
+#   - Automated dependency updates via Renovate
+#   - PR comments with dependency analysis summaries
+#   - Multi-repository discovery support when token has org-wide access
+#
+# Usage:
+#   jobs:
+#     sca:
+#       uses: ministryofjustice/devsecops-actions/.github/workflows/_sca.yml@main
+#       with:
+#         renovate-version: "42.64.1"  # Optional, defaults to v42.64.1
+#       secrets:
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#
+# Inputs:
+#   renovate-version:
+#     description: Version of Renovate CLI to use
+#     type: string
+#     required: false
+#     default: "42.64.1"
+#
+# Secrets:
+#   token:
+#     description: GitHub token with required permissions
+#     required: true
+#     permissions:
+#       - contents: write
+#       - pull-requests: write
+#       - issues: write
+#       - security-events: read
+#
+# Jobs:
+#   setup:
+#     description: Initializes workflow environment and timezone configuration
+#     outputs:
+#       - environment: The deployment environment (defaults to 'base')
+#       - timezone: The configured timezone from repository variables
+#
+#   dependencies:
+#     description: Runs dependency analysis and automated updates
+#     steps:
+#       - Checks out repository
+#       - Sets up Node.js environment
+#       - Installs dependencies
+#       - Performs dependency review and security scanning
+#       - Executes Renovate for automated dependency updates
+#
+# Concurrency:
+#   group: moj-actions-dependencies
+#   cancel-in-progress: false
+#   note: Ensures only one dependency update runs at a time
+#
+# Environment Variables:
+#   RENOVATE_AUTODISCOVER: Enables multi-repo discovery when token has org access
+#
+
 name: SCA ⚡️
 run-name: SCA-enabled dependency governance workflow
 
