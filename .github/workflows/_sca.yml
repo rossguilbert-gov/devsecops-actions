@@ -57,7 +57,6 @@
 #
 # Notes:
 # - All action versions are frozen using commit SHAs for security
-# - RENOVATE_AUTODISCOVER is enabled for organization-wide repository discovery
 # - Concurrency group 'moj-actions-dependencies' ensures only one run at a time
 # - NPM dependencies are installed with --ignore-scripts for security
 #
@@ -146,6 +145,3 @@ jobs:
         with:
           token: ${{ secrets.token }}
           renovate-version: ${{ inputs.renovate-version }}
-        env:
-          # Enables multi-repo discovery when the token has organisation wide access
-          RENOVATE_AUTODISCOVER: true
