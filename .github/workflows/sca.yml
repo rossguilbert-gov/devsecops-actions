@@ -1,0 +1,25 @@
+name: SCA ⚡️
+run-name: Software Composition Analysis ⚡️
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+  pull_request:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  dependencies:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      security-events: read
+
+    uses: ministryofjustice/devsecops-actions/.github/workflows/_sca.yml@7aa180ff5608f4f786912bb47ac098a096eacd05
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}

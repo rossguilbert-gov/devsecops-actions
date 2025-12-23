@@ -22,7 +22,7 @@ and container security.
 
 - [Architecture](#️-architecture)
 - [Available Workflows](#-available-workflows)
-  - [Dependency Review Workflow](#-dependency-review-workflow-_dependencyyml)
+  - [SCA Workflow](#-sca-workflow-_scayml)
 - [Usage Examples](#-usage-examples)
 - [Development](#️-development)
 - [Contributing](#-contributing)
@@ -35,7 +35,7 @@ and container security.
 
 ### Key Architecture Concepts
 
-1. **Reusable Workflow Pattern**: Workflows prefixed with `_` (e.g., `_dependency.yml`) are designed to be called by other workflows
+1. **Reusable Workflow Pattern**: Workflows prefixed with `_` (e.g., `_sca.yml`) are designed to be called by other workflows
 2. **Explicit Permissions**: Caller workflows must explicitly declare all required permissions
 3. **Version Pinning**: Use `@vx.x.x` for latest updates or `@<commit-sha>` for stability
 4. **Centralised Maintenance**: Developed and managed by PandA team, with future updates triggered automatically.
@@ -44,7 +44,7 @@ and container security.
 
 ## 🚀 Available Workflows
 
-### 🔍 Dependency Review Workflow (`_dependency.yml`)
+### 🔍 SCA Workflow (`_sca.yml`)
 
 **Reusable workflow** for comprehensive dependency management and security review.
 
@@ -53,8 +53,8 @@ and container security.
 - 🛡️ Scans dependencies for security vulnerabilities in pull requests
 - 🔄 Automatically discovers and updates outdated dependencies using Renovate Bot
 - 🌐 Supports organisation-wide repository discovery (with appropriate token permissions)
-- 💬 Provides PR comments with detailed dependency review summaries
-- 📊 Uses GitHub's Dependency Review Action for vulnerability scanning
+- 💬 Provides PR comments with detailed SCA summaries
+- 📊 Uses GitHub's SCA Action for vulnerability scanning
 
 #### 🧩 Workflow
 
@@ -90,13 +90,13 @@ and container security.
 
 ### Dependency Workflow
 
-To use the reusable `_dependency.yml` workflow in your repository:
+To use the reusable `_sca.yml` workflow in your repository:
 
 #### Basic Usage
 
 ```yaml
-name: Dependency Review
-run-name: Dependency Review ⚡️
+name: SCA
+run-name: SCA ⚡️
 
 on:
   schedule:
@@ -117,7 +117,7 @@ jobs:
       issues: write
       security-events: read
 
-    uses: ministryofjustice/devsecops-actions/.github/workflows/_dependency.yml@v1.0.0
+    uses: ministryofjustice/devsecops-actions/.github/workflows/_sca.yml@v1.0.0
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -125,8 +125,8 @@ jobs:
 #### Advanced Usage with Custom Renovate Version
 
 ```yaml
-name: Dependency Review
-run-name: Dependency Review ⚡️
+name: SCA
+run-name: SCA ⚡️
 
 on:
   schedule:
@@ -147,7 +147,7 @@ jobs:
       issues: write
       security-events: read
 
-    uses: ministryofjustice/devsecops-actions/.github/workflows/_dependency.yml@v1.0.0
+    uses: ministryofjustice/devsecops-actions/.github/workflows/_sca.yml@v1.0.0
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
     with:

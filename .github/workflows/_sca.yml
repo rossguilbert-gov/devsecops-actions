@@ -1,45 +1,5 @@
-# Reusable workflow for dependency management and security review
-#
-# This workflow performs comprehensive dependency analysis and automated updates using:
-# - GitHub's Dependency Review Action for security vulnerability scanning
-# - Renovate Bot for automated dependency updates
-#
-# Features:
-# - Scans dependencies for security vulnerabilities in pull requests
-# - Automatically discovers and updates outdated dependencies
-# - Supports organization-wide repository discovery (when token has appropriate permissions)
-# - Provides PR comments with dependency review summaries
-#
-# Inputs:
-#   renovate-version: (optional) Renovate CLI version to use (default: 42.64.1)
-#
-# Required Secrets:
-#   token: GitHub token with the following permissions:
-#     - contents: write (for committing updates)
-#     - pull-requests: write (for creating/updating PRs)
-#     - issues: write (for creating issues)
-#     - security-events: read (for scanning vulnerabilities)
-#
-# Environment Variables:
-#   TIMEZONE: (optional) Timezone configuration from repository variables
-#   NODE_VERSION: Node.js version from repository variables
-#
-# Concurrency:
-#   - Uses 'moj-actions-dependencies' group to prevent parallel runs
-#   - Does not cancel in-progress jobs
-#
-# Usage Example:
-#   jobs:
-#     dependency-review:
-#       uses: ministryofjustice/devsecops-actions/.github/workflows/_dependency.yml@main
-#       secrets:
-#         token: ${{ secrets.GITHUB_TOKEN }}
-#       with:
-#         renovate-version: "42.64.1"
-#
-
-name: Dependency review ⚡️
-run-name: Dependency review ⚡️
+name: SCA ⚡️
+run-name: SCA-enabled dependency governance workflow
 
 on:
   workflow_call:
