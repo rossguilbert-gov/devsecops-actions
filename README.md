@@ -62,9 +62,10 @@ and container security.
 
 #### Inputs
 
-| Input              | Type   | Required | Default   | Description                 |
-| ------------------ | ------ | -------- | --------- | --------------------------- |
-| `renovate-version` | string | No       | `42.64.1` | Renovate CLI version to use |
+| Input                           | Type   | Required | Default   | Description                                                                   |
+| ------------------------------- | ------ | -------- | --------- | ----------------------------------------------------------------------------- |
+| `renovate-version`              | string | No       | `42.64.1` | Renovate CLI version to use                                                   |
+| `dependency-review-config-file` | string | No       | `""`      | Path to dependency review configuration file relative to your repository root |
 
 #### Required Secrets
 
@@ -122,7 +123,7 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-#### Advanced Usage with Custom Renovate Version
+#### Advanced Usage with Custom Configuration
 
 ```yaml
 name: SCA
@@ -152,6 +153,7 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
     with:
       renovate-version: "42.64.1" # Specify custom Renovate version
+      dependency-review-config-file: ".github/dependency-review-config.yml" # Custom dependency review config
 ```
 
 ---
