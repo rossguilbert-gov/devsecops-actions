@@ -58,7 +58,7 @@ and container security.
 
 #### 🧩 Workflow
 
-![Dependency Workflow Architecture](docs/dependency-workflow.svg)
+![Dependency Workflow Architecture](docs/sca.svg)
 
 #### Inputs
 
