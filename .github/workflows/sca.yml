@@ -1,27 +1,3 @@
-# Software Composition Analysis (SCA) Workflow
-#
-# This workflow performs automated dependency scanning and security analysis for the repository.
-#
-# Triggers:
-#   - schedule: Runs daily at midnight (00:00 UTC)
-#   - pull_request: Runs on pull requests targeting the main branch
-#
-# Permissions:
-#   The workflow requires the following permissions:
-#   - contents: write - To update repository contents
-#   - pull-requests: write - To create and update pull requests
-#   - issues: write - To create and manage issues for findings
-#   - security-events: read - To read security event data
-#
-# Configuration:
-#   - Uses a reusable workflow from ministryofjustice/devsecops-actions
-#   - Dependency review configuration is loaded from .github/dependency-review-config.yml
-#   - Authenticates using the GITHUB_TOKEN secret
-#
-# Dependencies:
-#   - Reusable workflow: ministryofjustice/devsecops-actions/.github/workflows/_sca.yml
-#
-
 name: SCA ⚡️
 run-name: Software Composition Analysis ⚡️
 
@@ -34,16 +10,37 @@ on:
 
 permissions: {}
 
+env:
+  environment: base
+
 jobs:
-  dependencies:
+  # 1. Pre-requisite
+  setup:
+    name: Setup 🔧
+    runs-on: ["ubuntu-latest"]
+    outputs:
+      environment: ${{ env.environment }}
+    steps:
+      - name: Environment 🧪
+        run: echo "Environment set to ${{ env.environment }}"
+
+  # 2. MoJ - SCA
+  sca:
     permissions:
       contents: write
       pull-requests: write
       issues: write
       security-events: read
 
-    uses: ministryofjustice/devsecops-actions/.github/workflows/_sca.yml@2fa001f2e51f7ecf30ca05819a51a460a25e1510 # frozen: v1.0.0
-    with:
-      dependency-review-config-file: "./.github/dependency-review-config.yml"
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+    name: Execute ⚙️
+    runs-on: ["ubuntu-latest"]
+    needs: setup
+    environment:
+      name: ${{ needs.setup.outputs.environment }}
+
+    steps:
+      - name: SCA
+        uses: ministryofjustice/devsecops-actions/sca@2fa001f2e51f7ecf30ca05819a51a460a25e1510 # frozen: v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dependency-review-config-file: "./.github/dependency-review-config.yml"
