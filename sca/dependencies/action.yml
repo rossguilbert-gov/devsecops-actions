@@ -1,0 +1,92 @@
+# ==============================================================================
+# GitHub Dependency Review - Pull Request Analysis Action
+# ==============================================================================
+#
+# Copyright (c) Ministry of Justice UK
+# SPDX-License-Identifier: MIT
+#
+# ==============================================================================
+# DESCRIPTION
+# ==============================================================================
+# Performs automated dependency review for pull requests using GitHub's
+# Dependency Review API. Compares dependencies between base and head branches
+# to identify newly introduced vulnerabilities, license compliance issues,
+# and outdated packages. Provides gate-keeping functionality to prevent
+# vulnerable dependencies from being merged.
+#
+# ==============================================================================
+# FEATURES
+# ==============================================================================
+# - Detects newly introduced vulnerabilities in pull requests
+# - License compliance validation
+# - Identifies deprecated or unmaintained packages
+# - Customizable policy enforcement via configuration file
+# - Block PRs with high-severity vulnerabilities
+# - Provides detailed diff of dependency changes
+# - Supports all GitHub-supported package ecosystems
+#
+# ==============================================================================
+# USAGE
+# ==============================================================================
+# Basic usage (default settings):
+#   - uses: ministryofjustice/devsecops-actions/sca/dependencies@main
+#
+# With custom configuration:
+#   - uses: ministryofjustice/devsecops-actions/sca/dependencies@main
+#     with:
+#       dependency-review-config-file: ".github/dependency-review-config.yml"
+#
+# ==============================================================================
+# CONFIGURATION
+# ==============================================================================
+# Custom configuration file format (YAML):
+#   fail-on-severity: moderate
+#   allow-licenses:
+#     - MIT
+#     - Apache-2.0
+#     - BSD-3-Clause
+#   deny-licenses:
+#     - GPL-3.0
+#   allow-dependencies-licenses:
+#     - pkg:npm/@example/package
+#
+# See: https://github.com/actions/dependency-review-action#configuration
+#
+# ==============================================================================
+# TOOL INFORMATION
+# ==============================================================================
+# Tool: GitHub Dependency Review Action
+# Version: v4.8.3
+# Documentation: https://github.com/actions/dependency-review-action
+#
+# ==============================================================================
+# VERSION INFORMATION
+# ==============================================================================
+# Action Version: 1.0.0
+# Last Updated: 2026-01-15
+#
+# ==============================================================================
+
+name: 📊 Dependencies
+description: Dependencies scan
+author: Ministry of Justice UK
+
+inputs:
+  dependency-review-config-file:
+    required: false
+    description: "Path to the configuration file for GitHub Actions dependency review. Leave empty to use default settings."
+    default: ""
+
+  token:
+    required: true
+    description: "GitHub repository token with read and write permissions for contents, pull requests, and issues, plus read-only access to security events."
+
+runs:
+  using: composite
+  steps:
+    - name: Scan
+      uses: actions/dependency-review-action@774d14bf50b7a2e2460f9f49e25c52503ecab125 # v4.8.3
+      with:
+        config-file: ${{ inputs.dependency-review-config-file }}
+        head-ref: ${{ github.head_ref || github.sha }}
+        base-ref: ${{ github.base_ref || github.event.repository.default_branch }}

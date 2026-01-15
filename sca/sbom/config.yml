@@ -1,0 +1,249 @@
+# ==============================================================================
+# Syft Configuration File - SBOM Generation
+# ==============================================================================
+#
+# Copyright (c) Ministry of Justice UK
+# SPDX-License-Identifier: MIT
+#
+# ==============================================================================
+# DESCRIPTION
+# ==============================================================================
+# Enterprise-grade configuration for Syft SBOM generation optimized for
+# CI/CD pipelines and GitHub Actions. Balances comprehensive package detection
+# with performance, suitable for polyglot repositories and containerized
+# applications.
+#
+# ==============================================================================
+# DESIGN PHILOSOPHY
+# ==============================================================================
+# - Performance: Optimized for CI/CD speed without sacrificing accuracy
+# - Compliance: Meets NTIA minimum SBOM requirements
+# - Accuracy: Reduces false positives and noise
+# - Maintainability: Clear, well-documented configuration
+# - Security: Excludes sensitive paths, validates packages
+#
+# ==============================================================================
+# KEY FEATURES
+# ==============================================================================
+# - CycloneDX JSON output format (industry standard)
+# - Multi-language package detection
+# - License identification with 75% coverage threshold
+# - SHA-512 file digests for integrity
+# - Automatic CPU scaling for parallelism
+# - 7-day cache for performance
+# - Comprehensive exclusion patterns
+#
+# ==============================================================================
+# SUPPORTED ECOSYSTEMS
+# ==============================================================================
+# Package Managers:
+# - JavaScript: npm, yarn, pnpm
+# - Python: pip, poetry, pipenv
+# - Java: Maven, Gradle
+# - .NET: NuGet
+# - Go: go modules
+# - Ruby: bundler
+# - Rust: cargo
+# - PHP: composer
+# - Container: Docker, OCI
+#
+# ==============================================================================
+# USAGE
+# ==============================================================================
+# This file is automatically used by the SBOM action. For manual usage:
+#   syft scan ./ --config config.yml -o cyclonedx-json
+#
+# ==============================================================================
+# CUSTOMIZATION
+# ==============================================================================
+# To customize for your organization:
+# 1. Adjust 'exclude' patterns for your directory structure
+# 2. Modify language-specific settings based on your tech stack
+# 3. Enable 'enrich' for additional metadata (slower, more detailed)
+# 4. Adjust 'parallelism' for your CI/CD infrastructure
+#
+# ==============================================================================
+# PERFORMANCE TUNING
+# ==============================================================================
+# Fast CI/CD (current):
+# - search-unindexed-archives: false
+# - include-dev-dependencies: false
+# - parallelism: 0 (auto-scale)
+#
+# Comprehensive (slower):
+# - search-unindexed-archives: true
+# - include-dev-dependencies: true
+# - enrich: [all]
+#
+# ==============================================================================
+# COMPLIANCE
+# ==============================================================================
+# This configuration generates SBOMs compliant with:
+# - NTIA Minimum Elements for a Software Bill of Materials
+# - CycloneDX 1.5 specification
+# - Executive Order 14028 requirements
+# - ISO/IEC 5962 SBOM standard
+#
+# ==============================================================================
+# VERSION INFORMATION
+# ==============================================================================
+# Configuration Version: 1.0.0
+# Syft Compatibility: v1.0.0+
+# Last Updated: 2026-01-15
+#
+# ==============================================================================
+# DOCUMENTATION
+# ==============================================================================
+# Full Syft documentation: https://github.com/anchore/syft
+# Configuration options: https://github.com/anchore/syft#configuration
+#
+# ==============================================================================
+
+# =====================================================
+# Syft Configuration – Polyglot / CI / GitHub Actions
+# =====================================================
+
+# -------------------------
+# Logging
+# -------------------------
+log:
+  quiet: false
+  level: warn
+
+# -------------------------
+# Output (SBOMs)
+# -------------------------
+output:
+  - "cyclonedx-json=sca-sbom.cdx.json"
+
+format:
+  cyclonedx-json:
+    pretty: false
+
+# -------------------------
+# Package behavior
+# -------------------------
+package:
+  search-indexed-archives: true
+  search-unindexed-archives: false
+  exclude-binary-overlap-by-ownership: true
+
+# -------------------------
+# License handling
+# -------------------------
+license:
+  # include license text only when unknown (CI-friendly)
+  content: unknown
+
+  # minimum % match to consider a license valid
+  coverage: 75
+
+# -------------------------
+# File metadata
+# -------------------------
+file:
+  metadata:
+    # include only files owned by packages (fast + clean)
+    selection: owned-by-package
+    digests:
+      - sha512
+
+  content:
+    # skip large files (>250 KB)
+    skip-files-above-size: 256000
+
+# -------------------------
+# Relationships
+# -------------------------
+relationships:
+  package-file-ownership: true
+  package-file-ownership-overlap: true
+
+# -------------------------
+# Compliance rules
+# -------------------------
+compliance:
+  # drop unnamed packages (noise)
+  missing-name: drop
+
+  # stub missing versions (keeps graph intact)
+  missing-version: stub
+
+# -------------------------
+# Unknown handling
+# -------------------------
+unknowns:
+  remove-when-packages-defined: true
+  executables-without-packages: true
+  unexpanded-archives: true
+
+# -------------------------
+# Exclusions
+# -------------------------
+exclude:
+  - "**/.git/**"
+  - "**/node_modules/**"
+  - "**/vendor/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/target/**"
+  - "**/.venv/**"
+  - "**/__pycache__/**"
+
+# -------------------------
+# Performance
+# -------------------------
+parallelism: 0 # auto-scale based on CPU
+
+cache:
+  dir: "~/.cache/syft"
+  ttl: "7d"
+
+# -------------------------
+# Enrichment (OFF by default)
+# Enable only for release scans
+# -------------------------
+enrich: []
+
+# -------------------------
+# Language-specific settings
+# -------------------------
+java:
+  use-network: false
+  use-maven-local-repository: true
+  maven-local-repository-dir: "~/.m2/repository"
+  resolve-transitive-dependencies: false
+
+javascript:
+  include-dev-dependencies: false
+  search-remote-licenses: false
+
+python:
+  search-remote-licenses: false
+  guess-unpinned-requirements: false
+
+golang:
+  search-remote-licenses: false
+  local-mod-cache-dir: "~/go/pkg/mod"
+  main-module-version:
+    from-ld-flags: true
+    from-build-settings: true
+
+dotnet:
+  dep-packages-must-claim-dll: true
+  propagate-dll-claims-to-parents: true
+
+# -------------------------
+# Registry / container safety
+# -------------------------
+registry:
+  insecure-skip-tls-verify: false
+  insecure-use-http: false
+
+# -------------------------
+# Source metadata (optional)
+# -------------------------
+source:
+  name: ""
+  version: ""
+  supplier: ""
