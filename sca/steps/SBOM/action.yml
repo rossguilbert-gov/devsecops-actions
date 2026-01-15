@@ -1,34 +1,46 @@
-# SBOM Generation Action
+# GitHub Action for generating Software Bill of Materials (SBOM)
 #
-# This composite action generates a Software Bill of Materials (SBOM) for the repository
-# using Syft tool from Anchore. The SBOM is generated in CycloneDX JSON format and
-# uploaded as a build artifact.
-#
-# Features:
-#   - Installs Syft SBOM generation tool
-#   - Scans the repository to generate SBOM in CycloneDX JSON format
-#   - Uploads the generated SBOM as a GitHub Actions artifact
+# This action scans a repository and optionally Docker images to generate SBOM reports
+# in CycloneDX JSON format using Syft.
 #
 # Usage:
-#   steps:
-#     - uses: ministryofjustice/devsecops-actions/sca/steps/SBOM@main
-#       with:
-#         token: ${{ secrets.GITHUB_TOKEN }}
+#   - uses: ministryofjustice/devsecops-actions/sca/steps/SBOM@main
+#     with:
+#       token: ${{ secrets.GITHUB_TOKEN }}
+#       node_version: "24.11.1"  # optional
+#       docker-images-file: "images.json"  # optional
 #
 # Inputs:
 #   token:
-#     description: GitHub repository token with read/write privileges to contents,
-#                  pull requests, issues and read-only permission to security events
 #     required: true
+#     description: GitHub repository token with read/write access to contents, pull requests,
+#                  issues and read-only access to security events
+#   node_version:
+#     required: false
+#     default: "24.11.1"
+#     description: Node.js version to use for running the action
+#   docker-images-file:
+#     required: false
+#     default: ""
+#     description: Path to JSON file containing an 'images' array with Docker image URIs
+#                  (e.g., 'ghcr.io/ministryofjustice/devsecops-hooks:latest')
 #
 # Outputs:
-#   Uploads an artifact named "📋 SBOM" containing the sbom.cdx.json file
+#   Uploads SBOM artifacts in CycloneDX JSON format:
+#   - sca-sbom-repository.cdx.json: SBOM for the repository
+#   - sca-sbom-*.cdx.json: Additional SBOMs for Docker images (if provided)
 #
-# Requirements:
-#   - Linux or macOS runner
-#   - curl must be available
-#   - sudo access for tool installation
-#   - Config file must exist at sca/steps/SBOM/config.yml
+# Prerequisites:
+#   - Repository must have a package.json with 'install:syft' and 'scan' scripts
+#   - Syft configuration file must exist at the action path (config.yml)
+#
+# Example docker-images-file format:
+#   {
+#     "images": [
+#       "ghcr.io/ministryofjustice/app:latest",
+#       "ghcr.io/ministryofjustice/service:v1.0.0"
+#     ]
+#   }
 
 name: ⛓️‍💥 SBOM
 description: Software bill of material generation
@@ -39,19 +51,42 @@ inputs:
     required: true
     description: "GitHub repostiroy token with read and write privileges to contents, pull request, issues and read only perimission to security events."
 
+  node_version:
+    required: false
+    description: "Node.js version to use"
+    default: "24.11.1"
+
+  docker-images-file:
+    required: false
+    description: "A JSON file an 'images' property as an array containing URIs to docker image, for example 'ghcr.io/ministryofjustice/devsecops-hooks:latest'"
+    default: ""
+
 runs:
   using: composite
+
   steps:
+    - name: Node
+      uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v6.1.0
+      with:
+        node-version: ${{ inputs.node_version }}
+
     - name: Install
       shell: bash
-      run: curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+      run: |
+        npm ci --ignore-scripts
+        npm run install:syft
 
-    - name: Generate
+    - name: Repository
       shell: bash
-      run: syft scan ./ --base-path ${{ github.workspace }} --config ${{ github.action_path }}/config.yml --output cyclonedx-json=sbom.cdx.json --source-name "${{ github.repository }}" --source-version "${{ github.sha }}"
+      run: syft scan ./ --config ${{ github.action_path }}/config.yml --source-name "${{ github.repository }}" --source-version "${{ github.sha }} --output cyclonedx-json=sca-sbom-repository.cdx.json"
+
+    - name: Images
+      if: ${{ inputs.docker-images-file != '' }}
+      shell: bash
+      run: npm run scan -- --images "${{ inputs.docker-images-file }}"
 
     - name: Upload
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # frozen: v6.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
-        name: 📋 SBOM
-        path: sbom.cdx.json
+        name: SBOM
+        path: sca-sbom-*.cdx.json

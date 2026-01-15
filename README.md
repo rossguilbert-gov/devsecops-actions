@@ -60,6 +60,7 @@ and container security.
 - 🔑 Secret scanning using MoJ DevSecOps hooks and Trufflehog to detect exposed credentials
 - ⚙️ Code security analysis using CodeQL for vulnerability detection
 - 🛡️ OpenSSF Scorecard security scoring for project health assessment
+- ⛓️‍💥 Software Bill of Materials (SBOM) generation using Syft for dependencies and Docker images
 
 #### 🧩 Flowchart
 
@@ -72,10 +73,12 @@ and container security.
 | `token`                         | string | Yes      | N/A       | GitHub token with required permissions (contents: read/write, pull-requests: read/write, issues: read/write, security-events: read) |
 | `renovate`                      | string | No       | `true`    | Enable or disable Renovate bot execution                                                                                            |
 | `renovate-version`              | string | No       | `42.64.1` | Renovate CLI version to use                                                                                                         |
+| `node_version`                  | string | No       | `24.11.1` | Node.js version to use for SBOM generation                                                                                          |
 | `dependency-review-config-file` | string | No       | `""`      | Path to dependency review configuration file relative to your repository root                                                       |
 | `trufflehog-config-file`        | string | No       | `""`      | Path to Trufflehog configuration file for secret scanning                                                                           |
 | `codeql-config-file`            | string | No       | `""`      | Path to CodeQL configuration file for code analysis                                                                                 |
 | `codeql-upload-findings`        | string | No       | `always`  | Upload CodeQL findings as SARIF to Code Scanning. Set to "never" if default setup is enabled                                        |
+| `docker-images-file`            | string | No       | `""`      | Path to JSON file containing Docker image URIs for SBOM generation (format: `{"images": ["ghcr.io/org/image:tag"]}`)                |
 
 #### Required Permissions
 
@@ -85,6 +88,53 @@ and container security.
 | `pull-requests`   | write | For creating/updating PRs    |
 | `issues`          | write | For creating issues          |
 | `security-events` | read  | For scanning vulnerabilities |
+
+#### Docker Images Configuration
+
+To enable Docker image scanning for SBOM generation, create a JSON file containing the images you wish to scan.
+
+**File Structure:**
+
+Create a file (e.g., `sources.json`, `docker-images.json`) in your repository root with the following structure:
+
+```json
+{
+  "images": [
+    "ghcr.io/ministryofjustice/devsecops-hooks:latest",
+    "ghcr.io/ministryofjustice/devsecops-hooks:v1.0.0",
+    "ghcr.io/ministryofjustice/devsecops-hooks:v1.2.0",
+    "ghcr.io/ministryofjustice/devsecops-hooks:v1.3.0"
+  ]
+}
+```
+
+**Key Points:**
+
+- The file must contain an `images` property as an array
+- Each array element should be a fully qualified Docker image URI
+- Supports any valid image reference format (with tags please)
+- Multiple images can be specified for batch scanning
+- The SBOM action will generate separate SBOM files for each image
+
+**Usage in Workflow:**
+
+Reference the file using the `docker-images-file` input parameter:
+
+```yaml
+- uses: ministryofjustice/devsecops-actions/sca@v1.0.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    docker-images-file: ${{ github.workspace }}/sources.json
+```
+
+**Generated Artefacts:**
+
+The action will generate:
+
+- `sca-sbom-repository.cdx.json` - Repository dependencies SBOM
+- `sca-sbom-<image-name>.cdx.json` - Individual SBOM for each Docker image
+
+All SBOM files are in CycloneDX JSON format and uploaded as workflow artefacts.
 
 ---
 
@@ -160,10 +210,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           renovate: "true" # Enable Renovate bot
           renovate-version: "42.64.1" # Specify custom Renovate version
+          node_version: "24.11.1" # Node.js version for SBOM
           dependency-review-config-file: ".github/dependency-review-config.yml" # Custom dependency review config
           trufflehog-config-file: ".github/trufflehog-config.yml" # Custom Trufflehog config
           codeql-config-file: ".github/codeql-config.yml" # Custom CodeQL config
           codeql-upload-findings: "always" # Upload CodeQL findings
+          docker-images-file: "docker-images.json" # Docker images for SBOM generation
 ```
 
 #### Disable Renovate Bot

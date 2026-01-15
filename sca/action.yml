@@ -1,45 +1,79 @@
-# Ministry of Justice UK - Software Composition Analysis (SCA) Action
+# Software Composition Analysis (SCA) GitHub Action
 #
-# A comprehensive GitHub composite action that performs software composition analysis
-# including dependency management, secret scanning, and security vulnerability detection.
+# This composite action performs comprehensive security analysis for software dependencies,
+# secrets, and vulnerabilities. It orchestrates multiple security scanning tools to ensure
+# code quality and security compliance.
 #
 # Features:
-# - 📦 Repository checkout and setup
-# - 📊 Dependency review and analysis
-# - 🔎 OWASP dependency vulnerability scanning
-# - 🔁 Renovate automated dependency updates (optional)
-# - 🔑 Secret scanning
-# - 🐷 Trufflehog secret detection
-# - ⚙️ CodeQL security analysis
-# - 🛡 OpenSSF Scorecard security assessment
-# - 📋 SBOM (Software Bill of Materials) generation
+# - Dependency review and management via Renovate
+# - OWASP dependency checking
+# - Secret scanning with Trufflehog
+# - CodeQL static analysis
+# - OpenSSF Scorecard security assessment
+# - Software Bill of Materials (SBOM) generation
 #
 # Usage:
-#   - uses: ministryofjustice/devsecops-actions/sca@main
+#   - name: Run SCA
+#     uses: ministryofjustice/devsecops-actions/sca@main
 #     with:
 #       token: ${{ secrets.GITHUB_TOKEN }}
 #       renovate: 'true'
-#       renovate-version: '42.64.1'
-#       dependency-review-config-file: '.github/dependency-review-config.yml'
-#       trufflehog-config-file: '.github/trufflehog-config.yml'
-#       codeql-config-file: '.github/codeql-config.yml'
 #       codeql-upload-findings: 'always'
 #
 # Required Permissions:
-#   The provided token must have:
 #   - contents: read/write
 #   - pull-requests: read/write
 #   - issues: read/write
 #   - security-events: read
 #
 # Inputs:
-#   renovate: Enable/disable Renovate execution (default: 'true')
-#   renovate-version: Renovate CLI version (default: '42.64.1')
-#   dependency-review-config-file: Path to dependency review config (optional)
-#   trufflehog-config-file: Path to Trufflehog config (optional)
-#   codeql-config-file: Path to CodeQL config (optional)
-#   codeql-upload-findings: Upload CodeQL SARIF findings (default: 'always', use 'never' if default setup enabled)
-#   token: GitHub token with required permissions (required)
+#   renovate:
+#     Flag to enable/disable Renovate dependency updates
+#     Default: 'true'
+#
+#   node_version:
+#     Node.js runtime version for SBOM generation
+#     Default: '24.11.1'
+#
+#   renovate-version:
+#     Renovate CLI version to use
+#     Default: '42.64.1'
+#
+#   dependency-review-config-file:
+#     Path to custom dependency review configuration
+#     Optional
+#
+#   trufflehog-config-file:
+#     Path to custom Trufflehog configuration
+#     Optional
+#
+#   codeql-config-file:
+#     Path to custom CodeQL configuration
+#     Optional
+#
+#   codeql-upload-findings:
+#     Controls SARIF upload to Code Scanning ('always' or 'never')
+#     Default: 'always'
+#
+#   docker-images-file:
+#     Path to JSON file containing Docker image URIs for SBOM generation
+#     Format: {"images": ["ghcr.io/org/image:tag"]}
+#     Optional
+#
+#   token:
+#     GitHub token with appropriate permissions
+#     Required
+#
+# Steps:
+#   1. Repository checkout and setup
+#   2. Dependency review against security advisories
+#   3. OWASP dependency vulnerability scanning
+#   4. Renovate automated dependency updates (conditional)
+#   5. Secret detection in repository
+#   6. Trufflehog secret scanning
+#   7. CodeQL static code analysis
+#   8. OpenSSF Scorecard security assessment
+#   9. SBOM generation for dependencies and Docker images
 
 name: Ministry of Justice UK - SCA ⚡️
 description: Software composition analysis GitHub action for dependency management, secret scanning, and security vulnerability detection
@@ -50,6 +84,11 @@ inputs:
     required: false
     description: "Flag to evaluation Renovate execution"
     default: "true"
+
+  node_version:
+    required: false
+    description: "Node.js version to use"
+    default: "24.11.1"
 
   renovate-version:
     required: false
@@ -76,6 +115,11 @@ inputs:
     description: "Upload the findings from CodeQL as SARIF file to Code Scanning, set to never if default setup is enabled."
     default: "always"
 
+  docker-images-file:
+    required: false
+    description: "A JSON file an 'images' property as an array containing URIs to docker image, for example 'ghcr.io/ministryofjustice/devsecops-hooks:latest'"
+    default: ""
+
   token:
     required: true
     description: "GitHub repostiroy token with read and write privileges to contents, pull request, issues and read only perimission to security events."
@@ -95,7 +139,7 @@ runs:
       uses: ./sca/steps/OWASP
 
     - name: 🔁 Renovate
-      if: inputs.renovate == 'true'
+      if: ${{ inputs.renovate == 'true' }}
       uses: ./sca/steps/Renovate
       with:
         token: ${{ inputs.token }}
@@ -124,3 +168,5 @@ runs:
       uses: ./sca/steps/SBOM
       with:
         token: ${{ inputs.token }}
+        node_version: ${{ inputs.node_version }}
+        docker-images-file: ${{ inputs.docker-images-file }}

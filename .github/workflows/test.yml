@@ -1,0 +1,79 @@
+# Test workflow for devsecops-actions repository
+#
+# This workflow runs automated tests on pull requests targeting the main branch.
+# It consists of two main jobs:
+#
+# 1. setup: Prepares the test infrastructure by setting up environment variables
+#    - Outputs: environment name and timezone for downstream jobs
+#    - Sets environment to 'base' and uses repository-configured timezone
+#
+# 2. lint: Executes unit tests with coverage reporting
+#    - Requires: setup job completion
+#    - Permissions: read access to repository contents
+#    - Environment: Uses environment output from setup job
+#    - Steps:
+#      a. Checks out the repository code
+#      b. Configures Node.js using the version specified in repository variables
+#      c. Installs npm dependencies and Syft tool (for SBOM generation)
+#      d. Runs unit tests with coverage collection
+#
+# Permissions: Minimal permissions by default, with contents:read for the lint job
+# Trigger: Activated on pull requests to the main branch
+
+name: Tests 🧪
+run-name: Tests 🧪
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permissions: {}
+
+env:
+  environment: base
+  timezone: ${{ vars.TIMEZONE }}
+
+jobs:
+  # 1. Setup test infrastructure
+  setup:
+    name: Infrastructure 🔧
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ env.environment }}
+      timezone: ${{ env.timezone }}
+    steps:
+      - name: Environment 🧪
+        run: echo "Environment set to ${{ env.environment }}"
+
+      - name: Timezone 🌐
+        run: echo "Timezone set to ${{ env.timezone }}"
+
+  # 2. Various lint checks
+  lint:
+    permissions:
+      contents: read
+
+    name: Unit 🧪
+    needs: setup
+    environment:
+      name: ${{ needs.setup.outputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Node
+        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v6.1.0
+        with:
+          node-version: ${{ vars.NODE_VERSION }}
+
+      - name: Install
+        shell: bash
+        run: |
+          npm ci --ignore-scripts
+          npm run install:syft
+
+      - name: Execute
+        shell: bash
+        run: npm run test:unit:coverage
