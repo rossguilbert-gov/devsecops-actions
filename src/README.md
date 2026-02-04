@@ -68,6 +68,14 @@ npm run test:unit
 
 # Run all validations
 npm run validate:all
+
+# Run individual validations
+npm run lint:ts           # ESLint checks
+npm run validate:ts       # TypeScript type checking
+npm run validate:yml      # YAML linting
+npm run validate:md       # Markdown linting
+npm run validate:renovate # Renovate config validation
+npm run spellcheck        # Spell checking
 ```
 
 ---
@@ -236,6 +244,28 @@ npm run scan -- --images sources.json
 # Run with custom file path
 npm run scan -- --images /absolute/path/to/images.json
 ```
+
+#### Building the Project
+
+The `npm run build` command compiles TypeScript source files to JavaScript and prepares the project for distribution:
+
+```bash
+# Build the project
+npm run build
+```
+
+This command performs the following operations:
+
+- 🔨 **TypeScript Compilation** - Compiles all `.ts` files in `src/` to JavaScript
+- 📦 **Output Generation** - Creates compiled files in the `src/dist/` directory
+- 🗺️ **Source Maps** - Generates source map files for debugging
+- 📝 **Type Declarations** - Creates `.d.ts` files for TypeScript consumers
+
+**When to Build:**
+
+- ✅ Before committing changes to ensure code compiles successfully
+- ✅ When preparing for production deployment
+- ✅ After major refactoring to verify no compilation errors
 
 ### Project Structure Conventions
 
@@ -418,16 +448,22 @@ npx tsc && node dist/index.js --images sources.json
 # Validate all code
 npm run validate:all
 
-# Validate TypeScript
+# ESLint checks
+npm run lint:ts
+
+# TypeScript type checking
 npm run validate:ts
 
-# Validate YAML files
+# YAML linting
 npm run validate:yml
 
-# Validate Markdown files
+# Markdown linting
 npm run validate:md
 
-# Spell check
+# Renovate config validation
+npm run validate:renovate
+
+# Spell checking
 npm run spellcheck
 ```
 
@@ -439,7 +475,7 @@ npm run spellcheck
 - Prefer arrow functions for callbacks
 - Use explicit types for function parameters and returns
 - Avoid `any` type unless absolutely necessary
-- Use meaningful variable names (no single-letter names except loop counters)
+- Use meaningful variable names (avoid single-letter names except loop counters)
 
 **Documentation:**
 
@@ -717,7 +753,7 @@ This project is licensed under the **MIT License**.
 ```txt
 MIT License
 
-Copyright (c) 2024 Ministry of Justice
+Copyright (c) 2026 Ministry of Justice
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

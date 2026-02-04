@@ -1,4 +1,4 @@
-import { getArguments } from "./get-arguments.ts";
+import getArguments from "./get-arguments";
 
 describe("getArguments", () => {
   const originalArguments = process.argv;

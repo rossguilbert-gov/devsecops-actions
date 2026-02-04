@@ -1,12 +1,15 @@
 {
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": true,
-    "strict": true,
-    "noEmit": true,
+    "rootDir": "./",
+    "outDir": "./dist",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false,
+    "allowJs": false,
     "pretty": true
   },
+  "exclude": ["node_modules", "src/dist", "eslint.config.mjs"],
   "include": ["**/*.ts"]
 }
