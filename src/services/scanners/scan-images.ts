@@ -1,0 +1,84 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { resolve } from "node:path";
+
+/**
+ * Executes a scanning command for each Docker image in the provided array and reports the results.
+ *
+ * Processes all images in parallel, collecting results for successful and failed scans.
+ * Logs individual scan outcomes and throws an error if any scans fail.
+ *
+ * @param values - An array of string values (e.g., Docker image names with tags) to process
+ * @returns A promise that resolves to void on success, or rejects with a TypeError if any scans fail
+ * @throws {TypeError} If one or more images fail to scan successfully
+ *
+ * @example
+ * ```typescript
+ * await scanImages(['nginx:latest', 'alpine:3.18']);
+ * // Logs: ✅ Successfully scanned nginx:latest
+ * // Logs: ✅ Successfully scanned alpine:3.18
+ * // Logs: ✅ All 2 images have been successfully scanned.
+ * ```
+ */
+
+const scanImages = async (values: Array<string>): Promise<void> => {
+  const execAsync = promisify(execFile);
+
+  const promises = values.map(async (value) => {
+    try {
+      const sbom = resolve(process.cwd(), "sca", "sbom");
+      const image = value.split(":");
+
+      const command = "syft";
+      const argument = [
+        "scan",
+        value,
+        "--config",
+        `${sbom}/config.yml`,
+        "--source-name",
+        image[0],
+        "--source-version",
+        image[1],
+        "--output",
+        `cyclonedx-json=sca-sbom-${image[1]}.cdx.json`,
+      ];
+
+      await execAsync(command, argument, {
+        encoding: "utf8",
+      });
+
+      console.info("✅ Successfully scanned %s", value);
+      return { image: value, success: true };
+    } catch (error) {
+      console.error(
+        "❌ Failed to scan %s with the provided command %o",
+        value,
+        error,
+      );
+      return { image: value, success: false };
+    }
+  });
+
+  const results = await Promise.all(promises);
+
+  const failed = results.filter((scan) => !scan.success);
+
+  if (failed.length) {
+    console.error(
+      "\n\r\n\r❌ %i images did not scan successfully: \n\r",
+      failed.length,
+    );
+    failed.forEach(({ image }, index) => {
+      console.error("%i. %s", index + 1, image);
+    });
+
+    throw new TypeError("Image scanning failed");
+  } else {
+    console.info(
+      "\n\r\n\r✅ All %i images have been successfully scanned.",
+      values.length,
+    );
+  }
+};
+
+export default scanImages;

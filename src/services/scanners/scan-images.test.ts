@@ -1,4 +1,4 @@
-import execute from "./execute";
+import scanImages from "./scan-images";
 
 console.info = jest.fn();
 console.error = jest.fn();
@@ -11,18 +11,18 @@ describe("execute", () => {
 
   it("should successfully scan three docker images", async () => {
     // Arrange
-    const mockType = "--images";
     const mockValues = [
       "ghcr.io/ministryofjustice/devsecops-hooks:latest",
       "ghcr.io/ministryofjustice/devsecops-hooks:v1.0.0",
       "ghcr.io/ministryofjustice/devsecops-hooks:v1.2.0",
+      "ghcr.io/ministryofjustice/devsecops-hooks:v1.4.0@sha256:457a7e82b47146f56902607c4ec598c852f2afda640990d08fc3d00f28e38fbc",
     ];
 
     // Act
-    await execute(mockType, mockValues);
+    await scanImages(mockValues);
 
     // Assert
-    expect(console.info).toHaveBeenCalledTimes(4);
+    expect(console.info).toHaveBeenCalledTimes(5);
 
     expect(console.info).toHaveBeenCalledWith(
       "✅ Successfully scanned %s",
@@ -36,6 +36,10 @@ describe("execute", () => {
       "✅ Successfully scanned %s",
       mockValues[2],
     );
+    expect(console.info).toHaveBeenCalledWith(
+      "✅ Successfully scanned %s",
+      mockValues[3],
+    );
 
     expect(console.info).toHaveBeenCalledWith(
       "\n\r\n\r✅ All %i images have been successfully scanned.",
@@ -45,19 +49,14 @@ describe("execute", () => {
 
   it("should throw an error for an invalid source type", async () => {
     // Arrange
-    const mockType = "--invalid";
-    const mockValues = [
-      "ghcr.io/ministryofjustice/devsecops-hooks:latest",
-      "ghcr.io/ministryofjustice/devsecops-hooks:v1.0.0",
-      "ghcr.io/ministryofjustice/devsecops-hooks:v1.2.0",
-    ];
+    const mockValues = ["ghcr.io/ministryofjustice/devsecops-hooks:invalid"];
     const mockError = new TypeError("Image scanning failed");
 
     // Act + Assert
-    await expect(execute(mockType, mockValues)).rejects.toThrow(mockError);
+    await expect(scanImages(mockValues)).rejects.toThrow(mockError);
 
     // Assert
-    expect(console.error).toHaveBeenCalledTimes(7);
+    expect(console.error).toHaveBeenCalledTimes(3);
 
     expect(console.error).toHaveBeenCalledWith(
       "\n\r\n\r❌ %i images did not scan successfully: \n\r",
@@ -65,7 +64,5 @@ describe("execute", () => {
     );
 
     expect(console.error).toHaveBeenCalledWith("%i. %s", 1, mockValues[0]);
-    expect(console.error).toHaveBeenCalledWith("%i. %s", 2, mockValues[1]);
-    expect(console.error).toHaveBeenCalledWith("%i. %s", 3, mockValues[2]);
   });
 });

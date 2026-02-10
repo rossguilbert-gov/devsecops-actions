@@ -388,16 +388,16 @@ When adding new functionality, follow these guidelines:
 **Example Test:**
 
 ```typescript
-import { validateArguments } from "./valid-argument";
+import { areImageArgumentsValid } from "./valid-image-arguments";
 
-describe("validateArguments", () => {
+describe("areImageArgumentsValid", () => {
   it("should return true for valid arguments", () => {
-    const result = validateArguments(["--images", "sources.json"]);
+    const result = areImageArgumentsValid(["--images", "sources.json"]);
     expect(result).toBe(true);
   });
 
   it("should return false when missing arguments", () => {
-    const result = validateArguments(["--images"]);
+    const result = areImageArgumentsValid(["--images"]);
     expect(result).toBe(false);
   });
 });
@@ -499,7 +499,7 @@ npm run spellcheck
  * @param args - Array of command-line arguments
  * @returns True if arguments are valid, false otherwise
  */
-export function validateArguments(args: string[]): boolean {
+export function areImageArgumentsValid(args: string[]): boolean {
   if (args.length !== 2) {
     return false;
   }
