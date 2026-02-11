@@ -67,7 +67,7 @@ jobs:
 
       - name: Install
         shell: bash
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --omit=dev
 
       - name: ⚡️ SCA
         uses: ministryofjustice/devsecops-actions/sca@234ac1dca7bb965417bae451d3ea284a1286d68c # v1.3.0

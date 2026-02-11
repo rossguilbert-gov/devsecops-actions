@@ -213,7 +213,7 @@ jobs:
 
 ### Multi-Repository Synchronization
 
-For organizations managing multiple template-based repositories:
+For organisations managing multiple template-based repositories:
 
 ```yaml
 name: Bulk Template Sync
@@ -482,7 +482,7 @@ uses: ministryofjustice/devsecops-actions/cruft@v1.3.0
 uses: ministryofjustice/devsecops-actions/cruft@9babea875cafae0e3b05a5ec5aca76d6b560c42e
 
 # ⚠️ Not recommended: Using branch names (unpredictable)
-uses: ministryofjustice/devsecops-actions/cruft@main
+uses: ministryofjustice/devsecops-actions/cruft@v1.3.0
 ```
 
 ### Security Best Practices

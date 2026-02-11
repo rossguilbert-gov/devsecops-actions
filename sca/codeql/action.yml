@@ -21,7 +21,7 @@
 #   Python, Ruby, Swift, Kotlin
 # - Semantic code analysis for deep vulnerability detection
 # - Pre-built security queries for common vulnerability patterns
-# - Custom query support for organization-specific security policies
+# - Custom query support for organisation-specific security policies
 # - Automatic language detection and build system integration
 # - SARIF report generation for GitHub Code Scanning
 # - Integration with GitHub Advanced Security
@@ -30,16 +30,16 @@
 # USAGE
 # ==============================================================================
 # Basic usage (auto-detection):
-#   - uses: ministryofjustice/devsecops-actions/sca/codeql@main
+#   - uses: ministryofjustice/devsecops-actions/sca/codeql@v1.3.0
 #
 # With custom configuration:
-#   - uses: ministryofjustice/devsecops-actions/sca/codeql@main
+#   - uses: ministryofjustice/devsecops-actions/sca/codeql@v1.3.0
 #     with:
 #       codeql-config-file: ".github/codeql/codeql-config.yml"
 #       codeql-upload-findings: "always"
 #
 # Disable upload (for default CodeQL setup):
-#   - uses: ministryofjustice/devsecops-actions/sca/codeql@main
+#   - uses: ministryofjustice/devsecops-actions/sca/codeql@v1.3.0
 #     with:
 #       codeql-upload-findings: "never"
 #
