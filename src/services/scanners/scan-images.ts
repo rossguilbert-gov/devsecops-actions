@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Docker image scanner using Syft for SBOM generation.
+ *
+ * @module services/scanners/scan-images
+ */
+
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { resolve } from "node:path";
@@ -29,6 +35,7 @@ const scanImages = async (values: Array<string>): Promise<void> => {
     try {
       const sbom = resolve(process.cwd(), "sca", "sbom");
       const image = value.split(":");
+      const epoch = Date.now();
 
       const command = "syft";
       const argument = [
@@ -41,7 +48,7 @@ const scanImages = async (values: Array<string>): Promise<void> => {
         "--source-version",
         image[1],
         "--output",
-        `cyclonedx-json=sca-sbom-${image[1]}.cdx.json`,
+        `cyclonedx-json=sca-sbom-${image[1]}-${epoch}.cdx.json`,
       ];
 
       await execAsync(command, argument, {

@@ -6,8 +6,7 @@
 #
 # Triggers:
 #   - schedule: Daily at midnight (00:00 UTC)
-#   - pull_request: When PRs target the main branch
-#   - push: When code is pushed to the main branch
+#   - pull_request: When PRs target the any branch
 #   - workflow_dispatch: Manual workflow execution
 #   - branch_protection_rule: When branch protection rules are modified
 #
@@ -47,10 +46,8 @@ on:
     - cron: "0 0 * * *"
 
   pull_request:
-    branches: ["main"]
-
-  push:
-    branches: ["main"]
+    branches:
+      - "**" # All branches
 
   workflow_dispatch:
   branch_protection_rule:
@@ -102,8 +99,10 @@ jobs:
         run: npm ci --ignore-scripts --omit=dev
 
       - name: ⚡️ SCA
-        uses: ministryofjustice/devsecops-actions/sca@234ac1dca7bb965417bae451d3ea284a1286d68c # v1.3.0
+        uses: ministryofjustice/devsecops-actions/sca@610df48b2d9dfa94e2149328c8bf87b64ae27718 # v1.3.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Mandatory
+          token: "${{ secrets.GITHUB_TOKEN }}" # Mandatory
           dependency-review-config-file: "./.github/dependency-review-config.yml" # Optional
-          docker-images-file: ${{ github.workspace }}/sources.json # Optional
+          docker-images-file: "${{ github.workspace }}/sources.json" # Optional
+          dependency-check-suppression-file: "dependency-check-suppression.xml" # Optional
+

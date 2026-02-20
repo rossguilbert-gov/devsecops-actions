@@ -28,22 +28,19 @@
 # ==============================================================================
 # USAGE
 # ==============================================================================
-# Basic usage (repository scan only):
+# Basic usage:
 #   - uses: ministryofjustice/devsecops-actions/sca/sbom@v1.3.0
-#     with:
-#       token: ${{ secrets.GITHUB_TOKEN }}
 #
 # With Docker image scanning:
 #   - uses: ministryofjustice/devsecops-actions/sca/sbom@v1.3.0
 #     with:
-#       token: ${{ secrets.GITHUB_TOKEN }}
 #       docker-images-file: "docker-images.json"
 #
 # Custom Node.js version:
 #   - uses: ministryofjustice/devsecops-actions/sca/sbom@v1.3.0
 #     with:
-#       token: ${{ secrets.GITHUB_TOKEN }}
 #       node-version: "24.11.1"
+#       docker-images-file: "docker-images.json"
 #
 # ==============================================================================
 # DOCKER IMAGES FILE FORMAT
@@ -61,9 +58,9 @@
 # OUTPUTS
 # ==============================================================================
 # Artifacts generated:
-# - sca-sbom-repository.cdx.json: Repository SBOM
-# - sca-sbom-image-*.cdx.json: Individual Docker image SBOMs (if applicable)
-# - All artifacts uploaded to workflow run as "SBOM" artifact
+# - sca-sbom-repository-{run_number}-{run_attempt}-{job_index}.cdx.json: Repository SBOM
+# - sca-sbom-*.cdx.json: Individual Docker image SBOMs (if docker-images-file is provided)
+# - All artifacts uploaded to workflow run as "SBOM-{run_number}{run_attempt}{job_index}" artifact
 #
 # ==============================================================================
 # COMPLIANCE & STANDARDS
@@ -89,19 +86,15 @@
 # ==============================================================================
 # Action Version: 1.0.0
 # Default Node.js: 24.11.1
-# Last Updated: 2026-01-15
+# Last Updated: 2026-02-18
 #
 # ==============================================================================
 
-name: ⛓️‍💥 SBOM
-description: Software bill of material generation
+name: 📋 SBOM
+description: Software Bill of Materials generation
 author: Ministry of Justice UK
 
 inputs:
-  token:
-    required: true
-    description: "GitHub repository token with read and write permissions for contents, pull requests, and issues, plus read-only access to security events."
-
   node-version:
     required: false
     description: "Node.js version to use for SBOM generation and related tooling. Specify the exact version number."
@@ -128,7 +121,8 @@ runs:
 
     - name: Repository
       shell: bash
-      run: syft scan ./ --config ${{ github.action_path }}/config.yml --source-name "${{ github.repository }}" --source-version "${{ github.sha }}" --output cyclonedx-json=sca-sbom-repository.cdx.json
+      working-directory: ${{ github.workspace }}
+      run: syft scan ./ --config ${{ github.action_path }}/config.yml --source-name "${{ github.repository }}" --source-version "${{ github.sha }}" --output cyclonedx-json=sca-sbom-repository-${{ github.run_number }}-${{ github.run_attempt }}-${{ strategy.job-index }}.cdx.json
 
     - name: Images
       if: inputs.docker-images-file != ''
@@ -137,7 +131,7 @@ runs:
       run: npm run scan -- --images "${{ inputs.docker-images-file }}"
 
     - name: Upload
-      uses: actions/upload-artifact@9babea875cafae0e3b05a5ec5aca76d6b560c42e # v6.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
-        name: SBOM
+        name: SBOM-${{ github.run_number }}${{ github.run_attempt }}${{ strategy.job-index }}
         path: sca-sbom-*.cdx.json

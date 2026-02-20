@@ -5,7 +5,7 @@
 #   and adherence to project standards.
 #
 # Triggers:
-#   - pull_request: When PRs target the main branch
+#   - pull_request: When PRs target the any branch
 #
 # Permissions:
 #   - contents: read - Required for accessing repository contents
@@ -38,8 +38,9 @@ name: Lint check ✏️
 run-name: Lint check ✏️
 
 on:
-  pull_request:
-    branches: ["main"]
+  push:
+    branches:
+      - "**" # All branches
 
 permissions: {}
 
