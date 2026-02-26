@@ -164,6 +164,16 @@ inputs:
     description: "The file paths to the suppression XML files"
     default: ""
 
+  run-owasp:
+    required: false
+    description: "Enable or disable OWASP Dependency-Check scanning"
+    default: "true"
+
+  run-codeql:
+    required: false
+    description: "Enable or disable CodeQL SAST analysis"
+    default: "true"
+
 runs:
   using: composite
   steps:
@@ -176,6 +186,7 @@ runs:
         dependency-review-config-file: ${{ inputs.dependency-review-config-file }}
 
     - name: 🔎 OWASP
+      if: inputs.run-owasp == 'true'
       uses: ministryofjustice/devsecops-actions/sca/owasp@3746d6feae525c06818fdcd06fda5399ca12b78f
       with:
         output-directory-name: ${{ inputs.output-directory-name }}
@@ -198,6 +209,7 @@ runs:
         trufflehog-output-filename: ${{ inputs.trufflehog-output-filename }}
 
     - name: ⚙️ CodeQL
+      if: inputs.run-codeql == 'true'
       uses: ministryofjustice/devsecops-actions/sca/codeql@3746d6feae525c06818fdcd06fda5399ca12b78f
       with:
         codeql-languages: ${{ inputs.codeql-languages }}
