@@ -99,7 +99,7 @@ jobs:
         run: npm ci --ignore-scripts --omit=dev
 
       - name: ⚡️ SCA
-        uses: ministryofjustice/devsecops-actions/sca@03584c49c5095d52721315564bb6b5cfeae86fb1 # v1.3.0
+        uses: ./sca
         with:
           token: "${{ secrets.GITHUB_TOKEN }}" # Mandatory
           dependency-review-config-file: "./.github/dependency-review-config.yml" # Optional
@@ -126,6 +126,7 @@ jobs:
       - name: 🔎 OWASP
         uses: ./sca/owasp
         with:
+          output-directory-name: "reports"
           dependency-check-suppression-file: "dependency-check-suppression.xml"
 
   codeql:
@@ -146,4 +147,7 @@ jobs:
 
       - name: ⚙️ CodeQL
         uses: ./sca/codeql
+        with:
+          codeql-languages: ${{ vars.CODEQL_LANGUAGES }}
+          codeql-upload-findings: "always"
 
