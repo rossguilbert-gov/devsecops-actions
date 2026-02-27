@@ -23,10 +23,8 @@
 #     - Outputs: environment name and timezone for downstream jobs
 #
 #   sca:
-#     - Checks out the repository code
-#     - Configures Node.js environment
-#     - Installs project dependencies
-#     - Executes SCA scan with dependency review and container image scanning
+#     - Calls the reusable SCA workflow (.github/workflows/sca-reusable.yml)
+#     - Runs OWASP and CodeQL in parallel with the remaining sequential tools
 #
 # Configuration:
 #   - Environment: base (configurable via env vars)
@@ -36,7 +34,6 @@
 #
 # Required Variables:
 #   - TIMEZONE: Repository variable defining the timezone for operations
-#   - NODE_VERSION: Node.js version for the runtime environment
 
 name: SCA ⚡️
 run-name: Software Composition Analysis ⚡️
@@ -71,83 +68,14 @@ jobs:
 
       - name: Timezone 🌐
         run: echo "Timezone set to ${{ env.timezone }}"
+
   sca:
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      security-events: write
-      actions: read
-
-    name: Execute ⚙️
-    runs-on: ["ubuntu-latest"]
+    name: SCA ⚡️
     needs: setup
-    environment:
-      name: ${{ needs.setup.outputs.environment }}
-
-    steps:
-      - name: Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.1.0
-        with:
-          node-version: ${{ vars.NODE_VERSION }}
-
-      - name: Install
-        shell: bash
-        run: npm ci --ignore-scripts --omit=dev
-
-      - name: ⚡️ SCA
-        uses: ministryofjustice/devsecops-actions/sca@03584c49c5095d52721315564bb6b5cfeae86fb1 # v1.3.0
-        with:
-          token: "${{ secrets.GITHUB_TOKEN }}" # Mandatory
-          dependency-review-config-file: "./.github/dependency-review-config.yml" # Optional
-          docker-images-file: "${{ github.workspace }}/sources.json" # Optional
-          dependency-check-suppression-file: "dependency-check-suppression.xml" # Optional
-          run-owasp: "false"
-          run-codeql: "false"
-
-  owasp:
-    permissions:
-      contents: read
-      security-events: write
-
-    name: OWASP 🔎
-    runs-on: ["ubuntu-latest"]
-    needs: setup
-    environment:
-      name: ${{ needs.setup.outputs.environment }}
-
-    steps:
-      - name: Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: 🔎 OWASP
-        uses: ./sca/owasp
-        with:
-          output-directory-name: "reports"
-          dependency-check-suppression-file: "dependency-check-suppression.xml"
-
-  codeql:
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-
-    name: CodeQL ⚙️
-    runs-on: ["ubuntu-latest"]
-    needs: setup
-    environment:
-      name: ${{ needs.setup.outputs.environment }}
-
-    steps:
-      - name: Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: ⚙️ CodeQL
-        uses: ./sca/codeql
-        with:
-          codeql-languages: ${{ vars.CODEQL_LANGUAGES }}
-          codeql-upload-findings: "always"
+    uses: ./.github/workflows/sca-reusable.yml
+    with:
+      dependency-review-config-file: "./.github/dependency-review-config.yml"
+      docker-images-file: "${{ github.workspace }}/sources.json"
+      dependency-check-suppression-file: "dependency-check-suppression.xml"
+    secrets: inherit
 
