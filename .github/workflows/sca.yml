@@ -126,6 +126,7 @@ jobs:
       - name: 🔎 OWASP
         uses: ./sca/owasp
         with:
+          output-directory-name: "reports"
           dependency-check-suppression-file: "dependency-check-suppression.xml"
 
   codeql:
@@ -146,4 +147,7 @@ jobs:
 
       - name: ⚙️ CodeQL
         uses: ./sca/codeql
+        with:
+          codeql-languages: ${{ vars.CODEQL_LANGUAGES }}
+          codeql-upload-findings: "always"
 

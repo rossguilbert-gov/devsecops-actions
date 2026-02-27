@@ -128,7 +128,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: ⚡️ SCA
-        uses: ministryofjustice/devsecops-actions/sca@4cba938a5e1a31dc21c0f97e1cc7a9c02b81f1ee # sca-concurrency
+        uses: ./sca
         with:
           token: ${{ secrets.token }}
           renovate: ${{ inputs.renovate }}
@@ -155,7 +155,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: 🔎 OWASP
-        uses: ministryofjustice/devsecops-actions/sca/owasp@4cba938a5e1a31dc21c0f97e1cc7a9c02b81f1ee # sca-concurrency
+        uses: ./sca/owasp
         with:
           output-directory-name: ${{ inputs.output-directory-name }}
           dependency-check-suppression-file: ${{ inputs.dependency-check-suppression-file }}
@@ -174,7 +174,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: ⚙️ CodeQL
-        uses: ministryofjustice/devsecops-actions/sca/codeql@4cba938a5e1a31dc21c0f97e1cc7a9c02b81f1ee # sca-concurrency
+        uses: ./sca/codeql
         with:
           codeql-languages: ${{ inputs.codeql-languages }}
           codeql-config-file: ${{ inputs.codeql-config-file }}
