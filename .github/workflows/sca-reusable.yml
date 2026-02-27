@@ -21,19 +21,28 @@
 #   codeql:
 #     - Runs CodeQL SAST in parallel
 #
-# Permissions required in the calling workflow job:
+# Permissions required in the calling workflow (or job):
 #   permissions:
 #     contents: write
 #     pull-requests: write
 #     issues: write
 #     security-events: write
 #     actions: read
+#
+# Secrets:
+#   - token: GitHub token passed explicitly, or use secrets: inherit to pass GITHUB_TOKEN
 
 name: SCA Reusable ⚡️
 
 on:
   workflow_call:
     inputs:
+      environment:
+        required: false
+        type: string
+        default: ""
+        description: "GitHub environment name to apply to each job for environment-scoped secrets and variables"
+
       renovate:
         required: false
         type: string
@@ -108,8 +117,8 @@ on:
 
     secrets:
       token:
-        required: true
-        description: "GitHub repository token with permissions for contents, pull requests, issues, and security events"
+        required: false
+        description: "GitHub repository token with permissions for contents, pull requests, issues, and security events. Defaults to GITHUB_TOKEN via secrets: inherit"
 
 jobs:
   sca:
@@ -122,6 +131,8 @@ jobs:
 
     name: Execute ⚙️
     runs-on: ["ubuntu-latest"]
+    environment:
+      name: ${{ inputs.environment }}
 
     steps:
       - name: Repository
@@ -158,6 +169,8 @@ jobs:
 
     name: OWASP 🔎
     runs-on: ["ubuntu-latest"]
+    environment:
+      name: ${{ inputs.environment }}
 
     steps:
       - name: Repository
@@ -177,6 +190,8 @@ jobs:
 
     name: CodeQL ⚙️
     runs-on: ["ubuntu-latest"]
+    environment:
+      name: ${{ inputs.environment }}
 
     steps:
       - name: Repository
