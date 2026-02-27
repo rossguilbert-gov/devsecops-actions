@@ -24,6 +24,9 @@
 #
 #   sca:
 #     - Calls the reusable SCA workflow (.github/workflows/sca-reusable.yml)
+#     - Checks out the repository code
+#     - Configures Node.js environment
+#     - Installs project dependencies
 #     - Runs OWASP and CodeQL in parallel with the remaining sequential tools
 #
 # Configuration:
@@ -34,6 +37,7 @@
 #
 # Required Variables:
 #   - TIMEZONE: Repository variable defining the timezone for operations
+#   - NODE_VERSION: Node.js version for the runtime environment
 
 name: SCA ⚡️
 run-name: Software Composition Analysis ⚡️
