@@ -76,6 +76,12 @@ jobs:
   sca:
     name: SCA ⚡️
     needs: setup
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      security-events: write
+      actions: read
     uses: ./.github/workflows/sca-reusable.yml
     with:
       dependency-review-config-file: "./.github/dependency-review-config.yml"
